@@ -1,3 +1,9 @@
+INFORMATION
+===========
+
+This fork is a modified version that support burrow 1.0.0 (Commit b8908854194b3cb59d34bb1805826855c1eb8fe6)
+There are a lot of changes on the endpoint version 2 into version 3
+
 Purpose
 =======
 
