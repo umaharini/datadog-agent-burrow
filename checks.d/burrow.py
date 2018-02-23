@@ -49,23 +49,25 @@ class BurrowCheck(AgentCheck):
             consumers_path = "%s/%s/consumer" % (CLUSTER_ENDPOINT, cluster)
             consumers_list = self._rest_request_to_json(burrow_address, consumers_path).get("consumers", [])
             for consumer in consumers_list:
-                lags_path = "%s/%s/lag" % (consumers_path, consumer)
-                lag_json = self._rest_request_to_json(burrow_address, lags_path)
-                if not lag_json:
-                    continue
-                status = lag_json["status"]
-                if status:
-                    consumer_tags = ["cluster:%s" % cluster, "consumer:%s" % consumer] + extra_tags
+                if consumer != "":
+                    lags_path = "%s/%s/lag" % (consumers_path, consumer)
+                    lag_json = self._rest_request_to_json(burrow_address, lags_path)
+                    if not lag_json:
+                        continue
+                    status = lag_json["status"]
 
-                    self.gauge("kafka.consumer.maxlag", status["maxlag"]["current_lag"], tags=consumer_tags)
-                    self.gauge("kafka.consumer.totallag", status["totallag"], tags=consumer_tags)
-                    self._submit_lag_status("kafka.consumer.lag_status", status["status"], tags=consumer_tags)
+                    if status["status"] != "NOTFOUND":
+                        consumer_tags = ["cluster:%s" % cluster, "consumer:%s" % consumer] + extra_tags
 
-                    for partition in status.get("partitions", []):
-                        if partition is not None:
-                            partition_tags = consumer_tags + ["topic:%s" % partition["topic"], "partition:%s" % partition["partition"]]
-                            self._submit_partition_lags(partition, partition_tags)
-                            self._submit_lag_status("kafka.consumer.partition_lag_status", partition["status"], tags=partition_tags)
+                        self.gauge("kafka.consumer.maxlag", status["maxlag"]["current_lag"], tags=consumer_tags)
+                        self.gauge("kafka.consumer.totallag", status["totallag"], tags=consumer_tags)
+                        self._submit_lag_status("kafka.consumer.lag_status", status["status"], tags=consumer_tags)
+
+                        for partition in status.get("partitions", []):
+                            if partition is not None:
+                                partition_tags = consumer_tags + ["topic:%s" % partition["topic"], "partition:%s" % partition["partition"]]
+                                self._submit_partition_lags(partition, partition_tags)
+                                self._submit_lag_status("kafka.consumer.partition_lag_status", partition["status"], tags=partition_tags)
 
     def _submit_lag_status(self, metric_namespace, status, tags):
         burrow_status = {
