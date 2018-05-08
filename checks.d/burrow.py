@@ -152,9 +152,10 @@ class BurrowCheck(AgentCheck):
                         # if not response:
                         #     continue
                         def u(offset):
-                            last_offset = offset["offsets"].pop()
-                            if last_offset:
-                                return last_offset["offset"]
+                            if len(offset["offsets"]) > 0:
+                                last_offset = offset["offsets"].pop()
+                                if last_offset:
+                                    return last_offset["offset"]
                             else:
                                 return 0
 
