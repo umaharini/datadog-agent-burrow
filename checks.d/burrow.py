@@ -121,7 +121,7 @@ class BurrowCheck(AgentCheck):
         """
         for cluster in clusters:
             cluster_path = "%s/%s" % (CLUSTER_ENDPOINT, cluster)
-            config_path = "%s/%s/%s" % (CONFIG_ENDPOINT, "consumer")
+            config_path = "%s/%s" % (CONFIG_ENDPOINT, "consumer")
             offsets_topic = self._rest_request_to_json(burrow_address, config_path).get("modules", [])
             topics_path = "%s/topic" % cluster_path
             topics_list = self._rest_request_to_json(burrow_address, topics_path).get("topics", [])
